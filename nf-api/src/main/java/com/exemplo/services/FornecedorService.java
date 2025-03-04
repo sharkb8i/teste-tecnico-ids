@@ -72,6 +72,9 @@ public class FornecedorService {
         if (dto.getTelefone() != null)
             fornecedor.setTelefone(dto.getTelefone());
 
+        if (dto.getSituacao() != null)
+            fornecedor.setSituacao(dto.getSituacao());
+
         fornecedorRepository.salvar(fornecedor);
         return fornecedor;
     }

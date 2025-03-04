@@ -33,6 +33,8 @@ public class CNPJ {
     }
 
     public static boolean validarCnpj(String cnpj) {
+        cnpj = cnpj.replaceAll("[^0-9]", "");
+        
         if (cnpj.length() != 14 || cnpj.matches("(\\d)\\1{13}"))
             return false;
         
@@ -52,6 +54,7 @@ public class CNPJ {
                 peso = (peso == 2) ? 9 : peso - 1;
             }
             int digito2 = (soma % 11 < 2) ? 0 : (11 - soma % 11);
+
 
             return cnpj.charAt(12) - '0' == digito1 && cnpj.charAt(13) - '0' == digito2;
         } catch (InputMismatchException e) {

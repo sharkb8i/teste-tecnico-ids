@@ -1,5 +1,7 @@
 package com.exemplo.dtos;
 
+import com.exemplo.entities.EnumBase;
+import com.exemplo.entities.EnumSituacaoFornecedor;
 import com.exemplo.valueobjects.Email;
 import com.exemplo.valueobjects.Telefone;
 
@@ -8,26 +10,24 @@ public class EditarFornecedorDTO {
     private String razaoSocial;
     private String email;
     private String telefone;
-    private String dataBaixa;
+    private EnumSituacaoFornecedor situacao;
 
     public EditarFornecedorDTO(String codigo,
             String razaoSocial,
             String email,
             String telefone,
-            String dataBaixa) {
+            String situacao) {
         this.codigo = codigo;
         this.razaoSocial = razaoSocial;
         this.email = email == null ? email : new Email(email).getEndereco();
         this.telefone = telefone == null ? telefone : new Telefone(telefone).getNumero();
-        this.dataBaixa = dataBaixa;
+        this.situacao = situacao == null ? 
+            EnumSituacaoFornecedor.ATIVO : 
+            EnumBase.fromString(EnumSituacaoFornecedor.class, situacao);
     }
 
     public String getCodigo() {
         return codigo;
-    }
-
-    public void setCodigo(String codigo) {
-        this.codigo = codigo;
     }
 
     public String getRazaoSocial() {
@@ -42,7 +42,7 @@ public class EditarFornecedorDTO {
         return telefone;
     }
 
-    public String getDataBaixa() {
-        return dataBaixa;
+    public EnumSituacaoFornecedor getSituacao() {
+        return situacao;
     }
 }
