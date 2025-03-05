@@ -76,12 +76,12 @@
     [closable]="false"
     [style]="{ width: '50vw', maxWidth: '400px' }"
   >
-    <form #form="ngForm">
+    <form [formGroup]="form">
       <div class="p-fluid">
         <div class="field col gap">
           <label for="codigo" class="modal-label">Código</label>
-          <input *ngIf="fornecedorSelecionado" id="codigo" name="codigo" type="text" pInputText [(ngModel)]="fornecedorSelecionado.codigo" class="modal-input" autofocus>
-          <p-message *ngIf="form.submitted && !fornecedorSelecionado?.codigo" severity="error" text="Código é obrigatório"></p-message>
+          <input *ngIf="fornecedorSelecionado" id="codigo" name="codigo" type="text" pInputText formControlName="codigo" class="modal-input" autofocus>
+          <p-message *ngIf="form.get('codigo')?.invalid && form.get('codigo')?.touched" severity="error" text="Código é obrigatório"></p-message>
         </div>
         <div class="field col gap">
           <label for="cnpj" class="modal-label">CNPJ</label>
@@ -90,22 +90,22 @@
             type="text"
             id="cnpj"
             name="cnpj"
-            [(ngModel)]="fornecedorSelecionado.cnpj"
             mask="99.999.999/9999-99"
+            formControlName="cnpj"
             [style]="{ width: '100%' }"
           />
-          <p-message *ngIf="form.submitted && !fornecedorSelecionado?.cnpj" severity="error" text="CNPJ é obrigatório"></p-message>
+          <p-message *ngIf="form.get('cnpj')?.invalid && form.get('cnpj')?.touched" severity="error" text="CNPJ é obrigatório"></p-message>
         </div>
         <div class="field col gap">
           <label for="razaoSocial" class="modal-label">Razão Social</label>
-          <input *ngIf="fornecedorSelecionado" id="razaoSocial" name="razaoSocial" type="text" pInputText [(ngModel)]="fornecedorSelecionado.razaoSocial">
-          <p-message *ngIf="form.submitted && !fornecedorSelecionado?.razaoSocial" severity="error" text="Razão Social é obrigatória"></p-message>
+          <input *ngIf="fornecedorSelecionado" id="razaoSocial" name="razaoSocial" type="text" pInputText formControlName="razaoSocial">
+          <p-message *ngIf="form.get('razaoSocial')?.invalid && form.get('razaoSocial')?.touched" severity="error" text="Razão Social é obrigatória"></p-message>
         </div>
         <div class="field col gap">
           <label for="email" class="modal-label">Email</label>
-          <input *ngIf="fornecedorSelecionado" id="email" name="email" type="email" pInputText [(ngModel)]="fornecedorSelecionado.email">
-          <p-message *ngIf="form.submitted && !fornecedorSelecionado?.email" severity="error" text="Email é obrigatório"></p-message>
-          <p-message *ngIf="form.submitted && fornecedorSelecionado?.email && !emailValido(fornecedorSelecionado?.email)" severity="error" text="Email inválido"></p-message>
+          <input *ngIf="fornecedorSelecionado" id="email" name="email" type="email" pInputText formControlName="email">
+          <p-message *ngIf="form.get('email')?.invalid && form.get('email')?.touched" severity="error" text="Email é obrigatório"></p-message>
+          <p-message *ngIf="form.get('email')?.invalid && form.get('email')?.touched && !emailValido(fornecedorSelecionado?.email)" severity="error" text="Email inválido"></p-message>
         </div>
         <div class="field col gap">
           <label for="telefone" class="modal-label">Telefone</label>
@@ -118,13 +118,13 @@
             [mask]="fornecedorSelecionado.telefone?.length === 11 ? '(45) 99999-9999' : '(45) 9999-9999'"
             [style]="{ width: '100%' }"
           /> -->
-          <input *ngIf="fornecedorSelecionado" id="telefone" name="telefone" type="text" pInputText [(ngModel)]="fornecedorSelecionado.telefone">
-          <p-message *ngIf="form.submitted && !fornecedorSelecionado?.telefone" severity="error" text="Telefone é obrigatório"></p-message>
+          <input *ngIf="fornecedorSelecionado" id="telefone" name="telefone" type="text" pInputText formControlName="telefone">
+          <p-message *ngIf="form.get('telefone')?.invalid && form.get('telefone')?.touched" severity="error" text="Telefone é obrigatório"></p-message>
         </div>
         <div class="field col">
           <label for="situacao" class="modal-label">Situação</label>
-          <p-select *ngIf="fornecedorSelecionado" id="situacao" name="situacao" [options]="situacoes" [(ngModel)]="fornecedorSelecionado.situacao" optionLabel="label" optionValue="value" [appendTo]="'body'"></p-select>
-          <p-message *ngIf="form.submitted && !fornecedorSelecionado?.situacao" severity="error" text="Situação é obrigatória"></p-message>
+          <p-select *ngIf="fornecedorSelecionado" id="situacao" name="situacao" formControlName="situacao" [options]="situacoes" optionLabel="label" optionValue="value" [appendTo]="'body'"></p-select>
+          <p-message *ngIf="form.get('situacao')?.invalid && form.get('situacao')?.touched" severity="error" text="Situação é obrigatória"></p-message>
         </div>
       </div>  
     </form>

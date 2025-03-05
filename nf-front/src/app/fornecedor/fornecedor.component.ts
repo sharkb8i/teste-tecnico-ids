@@ -5,7 +5,7 @@ import { HttpClientModule } from "@angular/common/http";
 import { ButtonModule } from "primeng/button";
 import { DialogModule } from "primeng/dialog";
 import { DropdownModule } from 'primeng/dropdown';
-import { FormBuilder, FormGroup, FormsModule, Validators } from "@angular/forms";
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { InputMask } from "primeng/inputmask";
 import { InputText } from "primeng/inputtext";
 import { Message } from "primeng/message";
@@ -28,10 +28,10 @@ import { FornecedorService } from "../api/fornecedor.service";
     ButtonModule,
     DialogModule,
     DropdownModule,
-    FormsModule,
     InputMask,
     InputText,
     Message,
+    ReactiveFormsModule,
     SelectModule,
     TableModule,
     TagModule,
@@ -49,17 +49,20 @@ export class FornecedorComponent implements OnInit {
   showCopyIcon: boolean = true;
   isNew: boolean = false;
 
-  // form: FormGroup;
+  form: FormGroup;
 
   constructor(private fornecedorService: FornecedorService,
     private toastService: MessageService,
     private fb: FormBuilder
   ) {
-    // this.form = this.fb.group({
-    //   email: ['', [Validators.required, Validators.email]],
-    //   nome: ['', Validators.required],
-    //   categoria: [null, Validators.required]
-    // });
+    this.form = this.fb.group({
+      codigo: ['', Validators.required],
+      cnpj: ['', [Validators.required, Validators.pattern(/^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/)]],
+      razaoSocial: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      telefone: ['', Validators.required],
+      situacao: ['ATIVO']
+    });
   }
 
   ngOnInit() {
@@ -91,15 +94,39 @@ export class FornecedorComponent implements OnInit {
   }
 
   editarFornecedor(fornecedor: Fornecedor): void {
+    this.form.patchValue({
+      codigo: fornecedor.codigo,
+      razaoSocial: fornecedor.razaoSocial,
+      email: fornecedor.email,
+      telefone: fornecedor.telefone,
+      cnpj: fornecedor.cnpj,
+      situacao: fornecedor.situacao
+    });
+
     this.fornecedorSelecionado = { ...fornecedor };
     this.isNew = false;
     this.displayDialog = true;
   }
 
   salvarFornecedor(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    const fornecedorData = {
+      id: this.fornecedorSelecionado?.id,
+      codigo: this.form.get('codigo')?.value,
+      razaoSocial: this.form.get('razaoSocial')?.value,
+      email: this.form.get('email')?.value,
+      telefone: this.form.get('telefone')?.value,
+      cnpj: this.form.get('cnpj')?.value,
+      situacao: this.form.get('situacao')?.value
+    };
+
     if (this.fornecedorSelecionado) {
       if (this.fornecedorSelecionado.id)
-        this.fornecedorService.updateFornecedor(this.fornecedorSelecionado)
+        this.fornecedorService.updateFornecedor(fornecedorData)
           .subscribe({
             next: () => {
               this.carregarFornecedores();
