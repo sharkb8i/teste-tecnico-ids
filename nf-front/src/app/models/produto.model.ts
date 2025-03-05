@@ -5,7 +5,7 @@ export interface Produto {
   codigo: string;
   descricao: string;
   situacao: string;
-  dataExclusao: string | null;
+  dataExclusao?: string | null;
 }
 
 export let colsProduto: Array<Column> = [

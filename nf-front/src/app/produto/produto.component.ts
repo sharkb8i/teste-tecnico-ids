@@ -5,10 +5,11 @@ import { HttpClientModule } from "@angular/common/http";
 import { ButtonModule } from "primeng/button";
 import { DialogModule } from "primeng/dialog";
 import { DropdownModule } from 'primeng/dropdown';
-import { FormsModule } from "@angular/forms";
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { InputText } from "primeng/inputtext";
+import { Message } from "primeng/message";
 import { MessageService } from 'primeng/api';
-import { SelectModule } from "primeng/select";
+import { Select, SelectModule } from "primeng/select";
 import { TableModule } from 'primeng/table';
 import { TagModule } from "primeng/tag";
 
@@ -26,8 +27,9 @@ import { colsProduto, Produto, situacoes } from "../models/produto.model";
     ButtonModule,
     DialogModule,
     DropdownModule,
-    FormsModule,
     InputText,
+    Message,
+    ReactiveFormsModule,
     SelectModule,
     TableModule,
     TagModule,
@@ -45,8 +47,18 @@ export class ProdutoComponent implements OnInit {
   showCopyIcon: boolean = false;
   isNew: boolean = false;
 
+  form: FormGroup;
+
   constructor(private produtoService: ProdutoService,
-    private toastService: MessageService) {}
+    private toastService: MessageService,
+    private fb: FormBuilder
+  ) {
+    this.form = this.fb.group({
+      codigo: ['', Validators.required],
+      descricao: [''],
+      situacao: ['ATIVO']
+    });
+  }
 
   ngOnInit() {
     if (!this.produtoSelecionado)
@@ -78,15 +90,33 @@ export class ProdutoComponent implements OnInit {
   }
 
   editarProduto(produto: Produto) {
+    this.form.patchValue({
+      codigo: produto.codigo,
+      descricao: produto.descricao,
+      situacao: produto.situacao
+    });
+
     this.produtoSelecionado = { ...produto };
     this.isNew = false;
     this.displayDialog = true;
   }
 
   salvarProduto() {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    const produtoData = {
+      id: this.produtoSelecionado?.id,
+      codigo: this.form.get('codigo')?.value,
+      descricao: this.form.get('descricao')?.value,
+      situacao: this.form.get('situacao')?.value
+    };
+
     if (this.produtoSelecionado) {
       if (this.produtoSelecionado.id)
-        this.produtoService.updateProduto(this.produtoSelecionado)
+        this.produtoService.updateProduto(produtoData)
           .subscribe({
             next: () => {
               this.carregarProdutos();
@@ -100,7 +130,7 @@ export class ProdutoComponent implements OnInit {
             }
           });
       else
-        this.produtoService.addProduto(this.produtoSelecionado)
+        this.produtoService.addProduto(produtoData)
           .subscribe({
             next: () => {
               this.carregarProdutos();

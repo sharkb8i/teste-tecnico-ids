@@ -76,24 +76,27 @@
     [closable]="false"
     [style]="{ width: '50vw', maxWidth: '400px' }"
   >
-    <div class="p-fluid">
-      <div class="field col gap">
-        <label for="codigo" class="modal-label">Código</label>
-        <input *ngIf="produtoSelecionado" id="codigo" type="text" pInputText [(ngModel)]="produtoSelecionado.codigo" class="modal-input" autofocus>
+    <form [formGroup]="form">
+      <div class="p-fluid">
+        <div class="field col gap">
+          <label for="codigo" class="modal-label">Código</label>
+          <input *ngIf="produtoSelecionado" id="codigo" name="codigo" type="text" pInputText formControlName="codigo" class="modal-input" autofocus>
+          <p-message *ngIf="form.get('codigo')?.invalid && form.get('codigo')?.touched" severity="error" text="Código é obrigatório"></p-message>
+        </div>
+        <div class="field col gap">
+          <label for="descricao" class="modal-label">Descrição</label>
+          <input *ngIf="produtoSelecionado" id="descricao" name="descricao" type="text" pInputText formControlName="descricao">
+        </div>
+        <div class="field col">
+          <label for="situacao" class="modal-label">Situação</label>
+          <p-select *ngIf="produtoSelecionado" id="situacao" name="situacao" formControlName="situacao" [options]="situacoes" optionLabel="label" optionValue="value" [appendTo]="'body'"></p-select>
+        </div>
       </div>
-      <div class="field col gap">
-        <label for="descricao" class="modal-label">Descrição</label>
-        <input *ngIf="produtoSelecionado" id="descricao" type="text" pInputText [(ngModel)]="produtoSelecionado.descricao">
-      </div>
-      <div class="field col">
-        <label for="situacao" class="modal-label">Situação</label>
-        <p-select *ngIf="produtoSelecionado" [options]="situacoes" [(ngModel)]="produtoSelecionado.situacao" optionLabel="label" optionValue="value" [appendTo]="'body'"></p-select>
-      </div>
-    </div>
+    </form>
     <ng-template pTemplate="footer">
       <div class="between">
         <button pButton type="button" label="Cancelar" (click)="displayDialog = false" class="button p-button-secondary" ></button>
-        <button pButton type="button" label="Salvar" (click)="salvarProduto()" class="button"></button>
+        <button pButton type="submit" label="Salvar" (click)="salvarProduto()" class="button" [disabled]="!form.valid"></button>
       </div>
     </ng-template>
   </p-dialog>

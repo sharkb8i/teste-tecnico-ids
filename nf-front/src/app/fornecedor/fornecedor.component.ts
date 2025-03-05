@@ -4,7 +4,6 @@ import { HttpClientModule } from "@angular/common/http";
 
 import { ButtonModule } from "primeng/button";
 import { DialogModule } from "primeng/dialog";
-import { DropdownModule } from 'primeng/dropdown';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { InputMask } from "primeng/inputmask";
 import { InputText } from "primeng/inputtext";
@@ -27,7 +26,6 @@ import { FornecedorService } from "../api/fornecedor.service";
     CommonModule,
     ButtonModule,
     DialogModule,
-    DropdownModule,
     InputMask,
     InputText,
     Message,
@@ -56,11 +54,11 @@ export class FornecedorComponent implements OnInit {
     private fb: FormBuilder
   ) {
     this.form = this.fb.group({
-      codigo: ['F001', Validators.required],
-      cnpj: ['11.222.333/0001-81', [Validators.required, Validators.pattern(/^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/)]],
-      razaoSocial: ['MARQUINHOS LTDA', Validators.required],
-      email: ['marquinhos@ltda.com', [Validators.required, Validators.email]],
-      telefone: ['4530356433', Validators.required],
+      codigo: ['', Validators.required],
+      cnpj: ['', [Validators.required, Validators.pattern(/^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/)]],
+      razaoSocial: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      telefone: ['', Validators.required],
       situacao: ['ATIVO']
     });
   }
