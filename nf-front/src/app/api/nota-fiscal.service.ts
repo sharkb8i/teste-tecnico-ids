@@ -25,7 +25,6 @@ export class NotaFiscalService {
   }
 
   updateNotaFiscal(notaFiscal: NotaFiscal) {
-    console.log(notaFiscal);
     return this.http.patch(`${this.apiUrl}/${notaFiscal.id}`, notaFiscal);
   }
 

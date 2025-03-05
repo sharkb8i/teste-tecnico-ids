@@ -56,11 +56,11 @@ export class FornecedorComponent implements OnInit {
     private fb: FormBuilder
   ) {
     this.form = this.fb.group({
-      codigo: ['', Validators.required],
-      cnpj: ['', [Validators.required, Validators.pattern(/^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/)]],
-      razaoSocial: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      telefone: ['', Validators.required],
+      codigo: ['F001', Validators.required],
+      cnpj: ['11.222.333/0001-81', [Validators.required, Validators.pattern(/^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/)]],
+      razaoSocial: ['MARQUINHOS LTDA', Validators.required],
+      email: ['marquinhos@ltda.com', [Validators.required, Validators.email]],
+      telefone: ['4530356433', Validators.required],
       situacao: ['ATIVO']
     });
   }
@@ -140,7 +140,7 @@ export class FornecedorComponent implements OnInit {
             }
           });
       else
-        this.fornecedorService.addFornecedor(this.fornecedorSelecionado)
+        this.fornecedorService.addFornecedor(fornecedorData)
           .subscribe({
             next: () => {
               this.carregarFornecedores();
