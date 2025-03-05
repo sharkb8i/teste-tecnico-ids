@@ -86,15 +86,13 @@ public class NotaFiscal extends PanacheEntityBase {
     }
 
     public void addItem(ItemNotaFiscal item) {
-        // this.itens.add(item);
-        // item.setNotaFiscal(this);
-        // this.fornecedor.update();
+        this.itens.add(item);
+        item.setNf(this);
     }
 
     public void removeItem(ItemNotaFiscal item) {
-        // this.itens.remove(item);
-        // item.setNotaFiscal(null);
-        // this.fornecedor.update();
+        this.itens.remove(item);
+        item.setNf(null);
     }
 
     public Long getNumeroNota() {

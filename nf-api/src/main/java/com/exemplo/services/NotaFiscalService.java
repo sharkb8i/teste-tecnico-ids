@@ -2,7 +2,9 @@ package com.exemplo.services;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -95,6 +97,15 @@ public class NotaFiscalService {
         return nf;
     }
 
+    public void emitirNotaFiscalPorId(UUID id) {
+        NotaFiscal nf = notaFiscalRepository.encontrarPorId(id)
+            .orElseThrow(() -> new RegistroNaoEncontradoException("Nota fiscal não encontrada para o id: " + id + "."));
+        
+        nf.setDataEmissao(LocalDateTime.now());
+        
+        notaFiscalRepository.salvar(nf);
+    }
+
     public NotaFiscal editarNotaFiscal(UUID id, EditarNotaFiscalDTO dto) {
         NotaFiscal nf = notaFiscalRepository.encontrarPorId(id)
             .orElseThrow(() -> new RegistroNaoEncontradoException("Nota fiscal não encontrada para o id: " + id + "."));
@@ -106,6 +117,15 @@ public class NotaFiscalService {
             nf.setFornecedor(fornecedor);
         }
 
+        if (dto.getValorTotal() != null && dto.getItens().size() == 0) {
+            BigDecimal valorCalculado = nf.getItens().stream()
+                .map(item -> item.getValorUnitario().multiply(item.getQuantidade()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+            
+            if (valorCalculado.compareTo(dto.getValorTotal()) != 0)
+                throw new ValorTotalInvalidoException("O valor total calculado sobre os itens da nota (" + valorCalculado + ") não corresponde ao valor total informado (" + dto.getValorTotal() + ").");
+        }
+
         if (dto.getEndereco() != null) {
             nf.setEndereco(new Endereco(
                 null,
@@ -115,6 +135,49 @@ public class NotaFiscalService {
                 dto.getEndereco().getCidade(),
                 dto.getEndereco().getEstado()
             ));
+        }
+
+        if (dto.getItens().size() > 0) {
+            Map<String, ItemNotaFiscalDTO> itensDtoMap = dto.getItens().stream()
+                .collect(Collectors.toMap(ItemNotaFiscalDTO::getId, itemDTO -> itemDTO));
+            
+            Iterator<ItemNotaFiscal> iterator = nf.getItens().iterator();
+            while (iterator.hasNext()) {
+                ItemNotaFiscal itemBanco = iterator.next();
+                ItemNotaFiscalDTO itemDTO = itensDtoMap.get(itemBanco.getId().toString());
+    
+                if (itemDTO != null) {
+                    itemBanco.setQuantidade(itemDTO.getQuantidade());
+                    itemBanco.setValorUnitario(itemDTO.getValorUnitario());
+                    itensDtoMap.remove(itemBanco.getId().toString());
+                } else {
+                    iterator.remove();
+                    itemNotaFiscalRepository.deletar(itemBanco);
+                }
+            }
+
+            for (ItemNotaFiscalDTO itemDTO : itensDtoMap.values()) {
+                Produto produto = produtoRepository.encontrarPorTermo("codigo", itemDTO.getCodProduto())
+                    .orElseThrow(() -> new RegistroNaoEncontradoException("Produto não encontrado para o código: " + itemDTO.getCodProduto() + "."));
+                
+                ItemNotaFiscal novoItem = new ItemNotaFiscal(
+                    (itemDTO.getId() == null) ? UUID.randomUUID() : UUID.fromString(itemDTO.getId()),
+                    produto,
+                    itemDTO.getValorUnitario(),
+                    itemDTO.getQuantidade(),
+                    null
+                );
+                nf.addItem(novoItem);
+            }
+            
+            BigDecimal valorTotalAtualizado = dto.getItens().stream()
+                .map(item -> item.getValorUnitario().multiply(item.getQuantidade()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+            
+            if (valorTotalAtualizado.compareTo(dto.getValorTotal()) != 0)
+                throw new ValorTotalInvalidoException("O valor total calculado sobre os itens da nota (" + valorTotalAtualizado + ") não corresponde ao valor total informado (" + dto.getValorTotal() + ").");
+
+            nf.setValorTotal(valorTotalAtualizado);
         }
 
         notaFiscalRepository.salvar(nf);

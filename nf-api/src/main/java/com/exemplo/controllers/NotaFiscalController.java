@@ -37,6 +37,14 @@ public class NotaFiscalController {
         return Response.ok(notaFiscal).status(200).build();
     }
 
+    @GET
+    @Path("/emitir/{id}")
+    @Transactional
+    public Response emitirNotaFiscalPorId(@PathParam("id") UUID id) {
+        notaFiscalService.emitirNotaFiscalPorId(id);
+        return Response.noContent().build();
+    }
+
     @PATCH
     @Path("/{id}")
     @Transactional
