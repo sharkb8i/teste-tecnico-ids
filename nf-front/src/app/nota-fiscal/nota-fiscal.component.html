@@ -1,0 +1,231 @@
+<div class="container" style="height: 100vh; display: flex; flex-direction: column;">
+  <p-table
+    dataKey="id"
+    [value]="notasFiscais"
+    [paginator]="true"
+    [rows]="10"
+    [rowsPerPageOptions]="[5, 10, 20]"
+    [rowHover]="true"
+    showGridlines
+    stripedRows
+    [tableStyle]="{ 'min-width': '75rem', 'flex-grow': 1, 'overflow': 'auto', 'border': '0px' }"
+    ngSkipHydration
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="{first} a {last} de {totalRecords} notasFiscais"
+  >
+    <ng-template #caption>
+      <div class="between">
+        <span class="text-xl font-bold">Notas Fiscais</span>
+        <button pButton type="button" icon="pi pi-plus" (click)="novaNotaFiscal()" label="Entrada" class="button"></button>
+      </div>
+    </ng-template>
+
+    <ng-template #header pTemplate="header">
+      <tr>
+        <th *ngFor="let col of cols" [style.width.%]="col.width">{{ col.label }}</th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body pTemplate="body" let-notaFiscal>
+      <tr>
+        <td *ngFor="let col of cols"
+          [class.truncate]="col.name === 'id'"
+          (mouseover)="showCopyIcon = true" 
+          (mouseleave)="showCopyIcon = false"
+          style="position: relative;"
+        >
+          <ng-container *ngIf="col.name === 'acoes'; else otherContent">
+            <div style="width: auto; display: inline-flex; gap: 5px;">
+              <button *ngIf="!notaFiscal.dataEmissao" pButton type="button" icon="pi pi-pencil" (click)="editarNotaFiscal(notaFiscal)" class="button" pTooltip="Editar" tooltipPosition="top"></button>
+              <button *ngIf="!notaFiscal.dataExclusao && !notaFiscal.dataEmissao" pButton type="button" icon="pi pi-send" (click)="emitirNotaFiscal(notaFiscal)" class="button p-button-info" pTooltip="Emitir" tooltipPosition="top"></button>
+              <button *ngIf="!notaFiscal.dataExclusao" pButton type="button" icon="pi pi-trash" (click)="excluirNotaFiscal(notaFiscal)" class="button p-button-danger" pTooltip="Excluir" tooltipPosition="top"></button>
+            </div>
+          </ng-container>
+      
+          <ng-template #otherContent>
+            <ng-container *ngIf="col.name === 'dataEmissao' || col.name === 'dataExclusao'; else defaultText">
+              {{ notaFiscal[col.name] | date:'dd/MM/yyyy HH:mm:ss' }}
+            </ng-container>
+    
+            <ng-template #defaultText>
+              {{ notaFiscal[col.name] }}
+            </ng-template>
+
+            <span *ngIf="col.name === 'id' && showCopyIcon" (click)="copiarAreaCorte(notaFiscal[col.name])" class="copy-icon pi pi-copy" title="Copiar ID"></span>
+          </ng-template>
+          <!-- {{ notaFiscal[col.name] | currency: 'BRL' }} -->
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template *ngIf="notasFiscais && notasFiscais.length == 0" #emptymessage>
+      <tr>
+        <td [attr.colspan]="cols.length + 1">Sem resultados.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <p-dialog
+    [(visible)]="displayDialog"
+    [header]="isNew ? 'Nova Nota Fiscal' : 'Editar Nota Fiscal'"
+    [modal]="true"
+    [closable]="false"
+    [style]="{ width: '70vw', maxWidth: '1320px' }"
+  >
+    <div class="p-fluid" style="display: flex;">
+      <div style="flex: 0 0 30%; margin-right: 20px;">
+        <h4 style="margin: 0; padding: 0; margin-bottom: 20px;">Nota</h4>
+
+        <div class="field col gap">
+          <label for="codFornecedor" class="modal-label">Código do Fornecedor</label>
+          <input *ngIf="notaFiscalSelecionada" id="codFornecedor" type="text" pInputText [(ngModel)]="notaFiscalSelecionada.codFornecedor" class="modal-input" autofocus>
+        </div>
+
+        <div class="field col gap">
+          <label for="valorTotal" class="modal-label">Valor Total</label>
+          <p-inputnumber
+            *ngIf="notaFiscalSelecionada"
+            id="valorTotal"
+            type="text"
+            pInputMask
+            [(ngModel)]="notaFiscalSelecionada.valorTotal"
+            mode="decimal"
+            locale="pt-BR"
+            prefix="R$ "
+            [minFractionDigits]="2"
+          />
+        </div>
+    
+        <div class="address-section">
+          <h4 style="margin: 0; padding: 0; margin-bottom: 20px;">Endereço</h4>
+          
+          <!-- <div class="field col gap">
+            <label for="cep" class="modal-label">CEP</label>
+            <input *ngIf="notaFiscalSelecionada" id="cep" type="text" pInputText [(ngModel)]="notaFiscalSelecionada.endereco.cep" class="modal-input">
+          </div> -->
+
+          <div class="field col gap">
+            <label for="logradouro" class="modal-label">Logradouro</label>
+            <input *ngIf="notaFiscalSelecionada" id="logradouro" type="text" pInputText [(ngModel)]="notaFiscalSelecionada.endereco.logradouro" class="modal-input">
+          </div>
+      
+          <div class="field col gap">
+            <label for="numero" class="modal-label">Número</label>
+            <input *ngIf="notaFiscalSelecionada" id="numero" type="text" pInputText [(ngModel)]="notaFiscalSelecionada.endereco.numero" class="modal-input">
+          </div>
+      
+          <div class="field col gap">
+            <label for="bairro" class="modal-label">Bairro</label>
+            <input *ngIf="notaFiscalSelecionada" id="bairro" type="text" pInputText [(ngModel)]="notaFiscalSelecionada.endereco.bairro" class="modal-input">
+          </div>
+      
+          <div class="field col gap">
+            <label for="cidade" class="modal-label">Cidade</label>
+            <input *ngIf="notaFiscalSelecionada" id="cidade" type="text" pInputText [(ngModel)]="notaFiscalSelecionada.endereco.cidade" class="modal-input">
+          </div>
+      
+          <div class="field col gap">
+            <label for="estado" class="modal-label">Estado</label>
+            <input *ngIf="notaFiscalSelecionada" id="estado" type="text" pInputText [(ngModel)]="notaFiscalSelecionada.endereco.estado" class="modal-input">
+          </div>
+        </div>
+      </div>
+
+      <div style="flex: 1;">
+        <h4 style="margin: 0; padding: 0; margin-bottom: 20px;">Itens</h4>
+        
+        <p-table
+          dataKey="id-itens"
+          [value]="notaFiscalSelecionada?.itens ?? []"
+          [paginator]="true"
+          [rows]="10"
+          [rowsPerPageOptions]="[5, 10, 20]"
+          [rowHover]="true"
+          stripedRows
+          [tableStyle]="{ 'width': '100%', 'flex-grow': 1, 'overflow': 'auto', 'border': '0px' }"
+          ngSkipHydration
+        >
+          <ng-template #header pTemplate="header">
+            <tr>
+              <th *ngFor="let col of colsItens" [style.width.%]="col.width">{{ col.label }}</th>
+            </tr>
+          </ng-template>
+          <ng-template #body pTemplate="body" let-notaFiscalItem>
+            <tr>
+              <td *ngFor="let col of colsItens">
+                <ng-container *ngIf="col.name === 'acoes'; else otherContent">
+                  <div style="width: auto; display: inline-flex; gap: 5px;">
+                    <button pButton type="button" icon="pi pi-trash" (click)="removerItem(notaFiscalItem)" class="button p-button-danger" ></button>
+                  </div>
+                </ng-container>
+            
+                <ng-template #otherContent>
+                  <ng-container *ngIf="notaFiscalSelecionada">
+                    <p-inputNumber *ngIf="col.name === 'valorUnitario'"
+                                   [(ngModel)]="notaFiscalItem[col.name]"
+                                   class="editable-input"
+                                   [mode]="'decimal'"
+                                   [min]="0"
+                                   [locale]="'pt-BR'"
+                                   prefix="R$ "
+                                   [minFractionDigits]="2">
+                    </p-inputNumber>
+
+                    <p-inputNumber *ngIf="col.name === 'quantidade'"
+                                   [(ngModel)]="notaFiscalItem[col.name]"
+                                   class="editable-input"
+                                   [mode]="'decimal'"
+                                   [min]="1"
+                                   [locale]="'pt-BR'"
+                                   [minFractionDigits]="2">
+                    </p-inputNumber>
+                    
+                    <input *ngIf="col.name !== 'valorUnitario' && col.name !== 'quantidade'" 
+                           type="text" 
+                           pInputText 
+                           [(ngModel)]="notaFiscalItem[col.name]"
+                           class="editable-input">
+                  </ng-container>
+                </ng-template>
+                <!-- {{ notaFiscalItem[col.name] | currency: 'BRL' }} -->
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template *ngIf="!temItens()" #emptymessage>
+            <tr>
+              <td [attr.colspan]="colsItens.length - 1">Sem resultados.</td>
+              <td>
+                <button pButton type="button" icon="pi pi-plus" (click)="adicionarItem()" class="button"></button>
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template #footer pTemplate="footer">
+            <tr *ngIf="temItens()">
+              <td [attr.colspan]="colsItens.length - 1"></td>
+              <td>
+                <button pButton type="button" icon="pi pi-plus" (click)="adicionarItem()" class="button"></button>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+    <ng-template pTemplate="footer">
+      <div class="between">
+        <button pButton type="button" label="Cancelar" (click)="displayDialog = false" class="button p-button-secondary" ></button>
+        <button pButton type="button" label="Salvar" (click)="salvarNotaFiscal()" class="button"></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <p-dialog [(visible)]="displayDialogConfirmacao" header="Confirmar Exclusão" [modal]="true" [closable]="false" [style]="{ width: '30vw', maxWidth: '400px' }">
+    <p>Tem certeza de que deseja excluir esta nota fiscal?</p>
+    <ng-template pTemplate="footer">
+      <div class="between">
+        <button pButton type="button" label="Cancelar" (click)="displayDialogConfirmacao = false" class="button p-button-secondary"></button>
+        <button pButton type="button" label="Excluir" (click)="confirmarExclusao()" class="button p-button-danger"></button>
+      </div>
+    </ng-template>
+  </p-dialog>  
+</div>

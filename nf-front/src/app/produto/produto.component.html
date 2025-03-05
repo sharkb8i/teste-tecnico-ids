@@ -1,0 +1,116 @@
+<div class="container" style="height: 100vh; display: flex; flex-direction: column;">
+  <p-table
+    dataKey="id"
+    [value]="produtos"
+    [paginator]="true"
+    [rows]="10"
+    [rowsPerPageOptions]="[5, 10, 20]"
+    [rowHover]="true"
+    showGridlines
+    stripedRows
+    [tableStyle]="{ 'min-width': '75rem', 'flex-grow': 1, 'overflow': 'auto', 'border': '0px' }"
+    ngSkipHydration
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="{first} a {last} de {totalRecords} produtos"
+  >
+  <ng-template #caption>
+    <div class="between">
+      <span class="text-xl font-bold">Produtos</span>
+      <button pButton type="button" icon="pi pi-plus" (click)="novoProduto()" label="Novo" class="button"></button>
+    </div>
+  </ng-template>
+
+    <ng-template #header pTemplate="header">
+      <tr>
+        <th *ngFor="let col of cols" [style.width.%]="col.width">{{ col.label }}</th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body pTemplate="body" let-produto>
+      <tr>
+        <td *ngFor="let col of cols"
+          [class.truncate]="col.name === 'id'"
+          (mouseover)="showCopyIcon = true" 
+          (mouseleave)="showCopyIcon = false"
+          style="position: relative;"
+          [ngStyle]="col.name === 'descricao' ? { 'flex': '1', 'width': 'auto' } : { 'width': col.width + '%' }"
+        >
+          <ng-container *ngIf="col.name === 'acoes'; else otherContent">
+            <div style="width: auto; display: inline-flex; gap: 5px;">
+              <button pButton type="button" icon="pi pi-pencil" (click)="editarProduto(produto)" class="button" pTooltip="Editar" tooltipPosition="top"></button>
+              <button *ngIf="!produto.dataExclusao" pButton type="button" icon="pi pi-trash" class="button p-button-danger" (click)="excluirProduto(produto)" pTooltip="Excluir" tooltipPosition="top"></button>
+            </div>
+          </ng-container>
+      
+          <ng-template #otherContent>
+            <ng-container *ngIf="col.label === 'situacao'; else defaultContent">
+              <p-tag [value]="produto[col.name]" [severity]="getSituacao(produto[col.name])"></p-tag>
+            </ng-container>
+      
+            <ng-template #defaultContent>
+              <ng-container *ngIf="col.name === 'dataExclusao'; else defaultText">
+                {{ produto[col.name] | date:'dd/MM/yyyy HH:mm:ss' }}
+              </ng-container>
+      
+              <ng-template #defaultText>
+                {{ produto[col.name] }}
+              </ng-template>
+
+              <span *ngIf="col.name === 'id' && showCopyIcon" (click)="copiarAreaCorte(produto[col.name])" class="copy-icon pi pi-copy" title="Copiar ID"></span>
+            </ng-template>
+          </ng-template>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template *ngIf="produtos && produtos.length == 0" #emptymessage>
+      <tr>
+        <td [attr.colspan]="cols.length + 1">Sem resultados.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <p-dialog
+    [(visible)]="displayDialog"
+    [header]="isNew ? 'Novo Produto' : 'Editar Produto'"
+    [modal]="true"
+    [closable]="false"
+    [style]="{ width: '50vw', maxWidth: '400px' }"
+  >
+    <div class="p-fluid">
+      <div class="field col gap">
+        <label for="codigo" class="modal-label">Código</label>
+        <input *ngIf="produtoSelecionado" id="codigo" type="text" pInputText [(ngModel)]="produtoSelecionado.codigo" class="modal-input" autofocus>
+      </div>
+      <div class="field col gap">
+        <label for="descricao" class="modal-label">Descrição</label>
+        <input *ngIf="produtoSelecionado" id="descricao" type="text" pInputText [(ngModel)]="produtoSelecionado.descricao">
+      </div>
+      <div class="field col">
+        <label for="situacao" class="modal-label">Situação</label>
+        <p-select *ngIf="produtoSelecionado" [options]="situacoes" [(ngModel)]="produtoSelecionado.situacao" optionLabel="label" optionValue="value" [appendTo]="'body'"></p-select>
+      </div>
+    </div>
+    <ng-template pTemplate="footer">
+      <div class="between">
+        <button pButton type="button" label="Cancelar" (click)="displayDialog = false" class="button p-button-secondary" ></button>
+        <button pButton type="button" label="Salvar" (click)="salvarProduto()" class="button"></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <p-dialog
+    [(visible)]="displayDialogConfirmacao"
+    header="Confirmar Exclusão"
+    [modal]="true"
+    [closable]="false"
+    [style]="{ width: '30vw', maxWidth: '400px' }"
+  >
+    <p>Tem certeza de que deseja excluir este produto?</p>
+    <ng-template pTemplate="footer">
+      <div class="between">
+        <button pButton type="button" label="Cancelar" (click)="displayDialogConfirmacao = false" class="button p-button-secondary"></button>
+        <button pButton type="button" label="Excluir" (click)="confirmarExclusao()" class="button p-button-danger"></button>
+      </div>
+    </ng-template>
+  </p-dialog>  
+</div>

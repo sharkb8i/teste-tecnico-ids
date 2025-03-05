@@ -1,0 +1,90 @@
+.container {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  flex: 1;
+}
+
+.between {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-label {
+  margin-bottom: 4px;
+}
+
+.modal-label, .modal-input {
+  font-size: 14px;
+}
+
+.gap {
+  margin-bottom: 10px;
+}
+
+.custom-dialog {
+  width: 60vw !important;
+  max-width: 700px !important;
+  min-width: 400px !important;
+}
+
+.button {
+  font-size: 14px;
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 150px;
+}
+
+td {
+  position: relative;
+}
+
+.id-text {
+  display: inline-block;
+  padding-right: 30px;
+  white-space: nowrap;
+}
+
+.copy-icon {
+  font-size: 16px;
+  color: #007bff;
+  cursor: pointer;
+  position: absolute;
+  top: 18px;
+  right: 5px;
+  background-color: rgba(0, 123, 255, 0.1);
+  border-radius: 20%;
+  padding: 5px;
+  transition: background-color 0.3s ease;
+}
+
+td:hover .copy-icon {
+  display: inline-block;
+}
+
+.copy-icon {
+  background-color: rgba(0, 123, 255, 0.3);
+}
+
+.address-section {
+  margin-top: 20px;
+}
+
+.editable-input {
+  width: 100%;
+  padding: 5px;
+  font-size: 14px;
+  text-align: center;
+  outline: none;
+}

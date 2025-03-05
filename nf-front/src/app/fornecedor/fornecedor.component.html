@@ -1,0 +1,148 @@
+<div class="container" style="height: 100vh; display: flex; flex-direction: column;">
+  <p-table
+    dataKey="id"
+    [value]="fornecedores"
+    [paginator]="true"
+    [rows]="10"
+    [rowsPerPageOptions]="[5, 10, 20]"
+    [rowHover]="true"
+    showGridlines
+    stripedRows
+    [tableStyle]="{ 'min-width': '75rem', 'flex-grow': 1, 'overflow': 'auto', 'border': '0px' }"
+    ngSkipHydration
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="{first} a {last} de {totalRecords} fornecedores"
+  >
+  <ng-template #caption>
+    <div class="between">
+      <span class="text-xl font-bold">Fornecedores</span>
+      <button pButton type="button" icon="pi pi-plus" (click)="novoFornecedor()" label="Novo" class="button"></button>
+    </div>
+  </ng-template>
+
+    <ng-template #header pTemplate="header">
+      <tr>
+        <th *ngFor="let col of cols" [style.width.%]="col.width">{{ col.label }}</th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body pTemplate="body" let-fornecedor>
+      <tr>
+        <td *ngFor="let col of cols"
+          [ngStyle]="col.name === 'descricao' ? { 'flex': '1', 'width': 'auto' } : { 'width': col.width + '%' }"
+          [class.truncate]="col.name === 'id'"
+          (mouseover)="showCopyIcon = true" 
+          (mouseleave)="showCopyIcon = false"
+          style="position: relative;"
+        >
+          <ng-container *ngIf="col.name === 'acoes'; else otherContent">
+            <div style="width: auto; display: inline-flex; gap: 5px;">
+              <button pButton type="button" icon="pi pi-pencil" (click)="editarFornecedor(fornecedor)" class="button" pTooltip="Editar" tooltipPosition="top"></button>
+              <button *ngIf="!fornecedor.dataExclusao" pButton type="button" icon="pi pi-trash" class="button p-button-danger" pTooltip="Excluir" tooltipPosition="top" (click)="excluirFornecedor(fornecedor)"></button>
+            </div>
+          </ng-container>
+      
+          <ng-template #otherContent>
+            <ng-container *ngIf="col.label === 'situacao'; else defaultContent">
+              <p-tag [value]="fornecedor[col.name]" [severity]="getSituacao(fornecedor[col.name])"></p-tag>
+            </ng-container>
+      
+            <ng-template #defaultContent>
+              <ng-container *ngIf="col.name === 'dataBaixa'; else defaultText">
+                {{ fornecedor[col.name] | date:'dd/MM/yyyy HH:mm:ss' }}
+              </ng-container>
+      
+              <ng-template #defaultText>
+                {{ fornecedor[col.name] }}
+              </ng-template>
+            </ng-template>
+          </ng-template>
+          
+          <span *ngIf="col.name === 'id' && showCopyIcon" (click)="copiarAreaCorte(fornecedor[col.name])" class="copy-icon pi pi-copy" title="Copiar ID"></span>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template *ngIf="fornecedores && fornecedores.length == 0" #emptymessage>
+      <tr>
+        <td [attr.colspan]="cols.length + 1">Sem resultados.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <p-dialog
+    [(visible)]="displayDialog"
+    [header]="isNew ? 'Novo Fornecedor' : 'Editar Fornecedor'"
+    [modal]="true"
+    [closable]="false"
+    [style]="{ width: '50vw', maxWidth: '400px' }"
+  >
+    <form #form="ngForm">
+      <div class="p-fluid">
+        <div class="field col gap">
+          <label for="codigo" class="modal-label">Código</label>
+          <input *ngIf="fornecedorSelecionado" id="codigo" name="codigo" type="text" pInputText [(ngModel)]="fornecedorSelecionado.codigo" class="modal-input" autofocus>
+          <p-message *ngIf="form.submitted && !fornecedorSelecionado?.codigo" severity="error" text="Código é obrigatório"></p-message>
+        </div>
+        <div class="field col gap">
+          <label for="cnpj" class="modal-label">CNPJ</label>
+          <p-inputmask
+            *ngIf="fornecedorSelecionado"
+            type="text"
+            id="cnpj"
+            name="cnpj"
+            [(ngModel)]="fornecedorSelecionado.cnpj"
+            mask="99.999.999/9999-99"
+            [style]="{ width: '100%' }"
+          />
+          <p-message *ngIf="form.submitted && !fornecedorSelecionado?.cnpj" severity="error" text="CNPJ é obrigatório"></p-message>
+        </div>
+        <div class="field col gap">
+          <label for="razaoSocial" class="modal-label">Razão Social</label>
+          <input *ngIf="fornecedorSelecionado" id="razaoSocial" name="razaoSocial" type="text" pInputText [(ngModel)]="fornecedorSelecionado.razaoSocial">
+          <p-message *ngIf="form.submitted && !fornecedorSelecionado?.razaoSocial" severity="error" text="Razão Social é obrigatória"></p-message>
+        </div>
+        <div class="field col gap">
+          <label for="email" class="modal-label">Email</label>
+          <input *ngIf="fornecedorSelecionado" id="email" name="email" type="email" pInputText [(ngModel)]="fornecedorSelecionado.email">
+          <p-message *ngIf="form.submitted && !fornecedorSelecionado?.email" severity="error" text="Email é obrigatório"></p-message>
+          <p-message *ngIf="form.submitted && fornecedorSelecionado?.email && !emailValido(fornecedorSelecionado?.email)" severity="error" text="Email inválido"></p-message>
+        </div>
+        <div class="field col gap">
+          <label for="telefone" class="modal-label">Telefone</label>
+          <!-- <p-inputmask
+            *ngIf="fornecedorSelecionado"
+            type="text"
+            id="telefone"
+            name="telefone"
+            [(ngModel)]="fornecedorSelecionado.telefone"
+            [mask]="fornecedorSelecionado.telefone?.length === 11 ? '(45) 99999-9999' : '(45) 9999-9999'"
+            [style]="{ width: '100%' }"
+          /> -->
+          <input *ngIf="fornecedorSelecionado" id="telefone" name="telefone" type="text" pInputText [(ngModel)]="fornecedorSelecionado.telefone">
+          <p-message *ngIf="form.submitted && !fornecedorSelecionado?.telefone" severity="error" text="Telefone é obrigatório"></p-message>
+        </div>
+        <div class="field col">
+          <label for="situacao" class="modal-label">Situação</label>
+          <p-select *ngIf="fornecedorSelecionado" id="situacao" name="situacao" [options]="situacoes" [(ngModel)]="fornecedorSelecionado.situacao" optionLabel="label" optionValue="value" [appendTo]="'body'"></p-select>
+          <p-message *ngIf="form.submitted && !fornecedorSelecionado?.situacao" severity="error" text="Situação é obrigatória"></p-message>
+        </div>
+      </div>  
+    </form>
+    <ng-template pTemplate="footer">
+      <div class="between">
+        <button pButton type="button" label="Cancelar" (click)="displayDialog = false" class="button p-button-secondary" ></button>
+        <button pButton type="submit" label="Salvar" (click)="salvarFornecedor()" class="button" [disabled]="!form.valid"></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <p-dialog [(visible)]="displayDialogConfirmacao" header="Confirmar Exclusão" [modal]="true" [closable]="false" [style]="{ width: '30vw', maxWidth: '400px' }">
+    <p>Tem certeza de que deseja excluir este fornecedor?</p>
+    <ng-template pTemplate="footer">
+      <div class="between">
+        <button pButton type="button" label="Cancelar" (click)="displayDialogConfirmacao = false" class="button p-button-secondary"></button>
+        <button pButton type="button" label="Excluir" (click)="confirmarExclusao()" class="button p-button-danger"></button>
+      </div>
+    </ng-template>
+  </p-dialog>  
+</div>
