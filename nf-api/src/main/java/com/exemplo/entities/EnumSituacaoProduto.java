@@ -1,10 +1,10 @@
 package com.exemplo.entities;
 
 public enum EnumSituacaoProduto implements EnumBase {
-    ATIVO, INATIVO;
+  ATIVO, INATIVO;
 
-    @Override
-    public String getDescricao() {
-        return name();
-    }
+  @Override
+  public String getDescricao() {
+    return name();
+  }
 }
