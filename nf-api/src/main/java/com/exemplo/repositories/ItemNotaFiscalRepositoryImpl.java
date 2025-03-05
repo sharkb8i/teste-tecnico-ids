@@ -13,24 +13,24 @@ import jakarta.persistence.TypedQuery;
 @ApplicationScoped
 public class ItemNotaFiscalRepositoryImpl extends BaseRepositoryImpl<ItemNotaFiscal> implements ItemNotaFiscalRepository {
 
-    public ItemNotaFiscalRepositoryImpl() {
-        super(null, ItemNotaFiscal.class);
-    }
+  public ItemNotaFiscalRepositoryImpl() {
+    super(null, ItemNotaFiscal.class);
+  }
 
-    @Inject
-    public ItemNotaFiscalRepositoryImpl(EntityManager entityManager) {
-        super(entityManager, ItemNotaFiscal.class);
-    }
+  @Inject
+  public ItemNotaFiscalRepositoryImpl(EntityManager entityManager) {
+    super(entityManager, ItemNotaFiscal.class);
+  }
 
-    @Override
-    public boolean validarProdutoVinculado(UUID idProduto) {
-        String queryString = "SELECT COUNT(i) FROM ItemNotaFiscal i WHERE i.produto.id = :idProduto";
-        
-        TypedQuery<Long> query = entityManager.createQuery(queryString, Long.class);
-        query.setParameter("idProduto", idProduto);
-        
-        long count = query.getSingleResult();
-        
-        return count > 0;
-    }
+  @Override
+  public boolean validarProdutoVinculado(UUID idProduto) {
+    String queryString = "SELECT COUNT(i) FROM ItemNotaFiscal i WHERE i.produto.id = :idProduto";
+    
+    TypedQuery<Long> query = entityManager.createQuery(queryString, Long.class);
+    query.setParameter("idProduto", idProduto);
+    
+    long count = query.getSingleResult();
+    
+    return count > 0;
+  }
 }

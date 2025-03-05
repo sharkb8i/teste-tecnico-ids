@@ -20,88 +20,88 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public class FornecedorService {
     
-    @Inject
-    FornecedorRepository fornecedorRepository;
+  @Inject
+  FornecedorRepository fornecedorRepository;
 
-    @Inject
-    NotaFiscalRepository notaFiscalRepository;
+  @Inject
+  NotaFiscalRepository notaFiscalRepository;
 
-    public Fornecedor criarFornecedor(CriarFornecedorDTO dto) {        
-        boolean fornecedorExiste = fornecedorRepository
-            .encontrarPorTermo("cnpj", dto.getCnpj().getNumero())
-            .isPresent();
+  public Fornecedor criarFornecedor(CriarFornecedorDTO dto) {        
+    boolean fornecedorExiste = fornecedorRepository
+      .encontrarPorTermo("cnpj", dto.getCnpj().getNumero())
+      .isPresent();
 
-        if (fornecedorExiste)
-            throw new RegistroDuplicadoException("Já existe um fornecedor cadastrado com este CNPJ: " + dto.getCnpj().getNumero() + ".");
+    if (fornecedorExiste)
+      throw new RegistroDuplicadoException("Já existe um fornecedor cadastrado com este CNPJ: " + dto.getCnpj().getNumero() + ".");
 
-        fornecedorExiste = fornecedorRepository
-            .encontrarPorTermo("codigo", dto.getCodigo())
-            .isPresent();
-            
-        if (fornecedorExiste)
-            throw new RegistroDuplicadoException("Já existe um fornecedor cadastrado com este código: " + dto.getCodigo() + ".");
+    fornecedorExiste = fornecedorRepository
+      .encontrarPorTermo("codigo", dto.getCodigo())
+      .isPresent();
         
-        Fornecedor fornecedor = new Fornecedor(
-            null,
-            dto.getCodigo(),
-            dto.getRazaoSocial(),
-            dto.getEmail().getEndereco(),
-            dto.getTelefone().getNumero(),
-            dto.getCnpj().getNumero(),
-            dto.getSituacao(),
-            null
-        );
+    if (fornecedorExiste)
+      throw new RegistroDuplicadoException("Já existe um fornecedor cadastrado com este código: " + dto.getCodigo() + ".");
+    
+    Fornecedor fornecedor = new Fornecedor(
+      null,
+      dto.getCodigo(),
+      dto.getRazaoSocial(),
+      dto.getEmail().getEndereco(),
+      dto.getTelefone().getNumero(),
+      dto.getCnpj().getNumero(),
+      dto.getSituacao(),
+      null
+    );
 
-        fornecedorRepository.salvar(fornecedor);
-        return fornecedor;
-    }
+    fornecedorRepository.salvar(fornecedor);
+    return fornecedor;
+  }
 
-    public Fornecedor editarFornecedor(UUID id, EditarFornecedorDTO dto) {
-        Fornecedor fornecedor = fornecedorRepository.encontrarPorId(id)
-            .orElseThrow(() -> new RegistroNaoEncontradoException("Fornecedor não encontrado para o id: " + id + "."));
+  public Fornecedor editarFornecedor(UUID id, EditarFornecedorDTO dto) {
+    Fornecedor fornecedor = fornecedorRepository.encontrarPorId(id)
+      .orElseThrow(() -> new RegistroNaoEncontradoException("Fornecedor não encontrado para o id: " + id + "."));
 
-        if (dto.getCodigo() != null)
-            fornecedor.setCodigo(dto.getCodigo());
-        
-        if (dto.getRazaoSocial() != null)
-            fornecedor.setRazaoSocial(dto.getRazaoSocial());
-        
-        if (dto.getEmail() != null)
-            fornecedor.setEmail(dto.getEmail());
-        
-        if (dto.getTelefone() != null)
-            fornecedor.setTelefone(dto.getTelefone());
+    if (dto.getCodigo() != null)
+      fornecedor.setCodigo(dto.getCodigo());
+    
+    if (dto.getRazaoSocial() != null)
+      fornecedor.setRazaoSocial(dto.getRazaoSocial());
+    
+    if (dto.getEmail() != null)
+      fornecedor.setEmail(dto.getEmail());
+    
+    if (dto.getTelefone() != null)
+      fornecedor.setTelefone(dto.getTelefone());
 
-        if (dto.getSituacao() != null)
-            fornecedor.setSituacao(dto.getSituacao());
+    if (dto.getSituacao() != null)
+      fornecedor.setSituacao(dto.getSituacao());
 
-        fornecedorRepository.salvar(fornecedor);
-        return fornecedor;
-    }
+    fornecedorRepository.salvar(fornecedor);
+    return fornecedor;
+  }
 
-    public void excluirFornecedor(UUID id) {
-        Fornecedor fornecedor = fornecedorRepository.encontrarPorId(id)
-            .orElseThrow(() -> new RegistroNaoEncontradoException("Fornecedor não encontrado para o id: " + id + "."));
+  public void excluirFornecedor(UUID id) {
+    Fornecedor fornecedor = fornecedorRepository.encontrarPorId(id)
+      .orElseThrow(() -> new RegistroNaoEncontradoException("Fornecedor não encontrado para o id: " + id + "."));
 
-        boolean fornecedorVinculadoNotaFiscal = notaFiscalRepository.validarFornecedorVinculado(id);
+    boolean fornecedorVinculadoNotaFiscal = notaFiscalRepository.validarFornecedorVinculado(id);
 
-        if (fornecedorVinculadoNotaFiscal)
-            throw new RegistroNaoExcludenteException("Fornecedor com id " + id + " está vinculado a uma nota fiscal e não pode ser excluído.");
+    if (fornecedorVinculadoNotaFiscal)
+      throw new RegistroNaoExcludenteException("Fornecedor com id " + id + " está vinculado a uma nota fiscal e não pode ser excluído.");
 
-        fornecedor.setSituacao(EnumSituacaoFornecedor.BAIXADO);
-        fornecedor.setDataBaixa(LocalDateTime.now());
+    fornecedor.setSituacao(EnumSituacaoFornecedor.BAIXADO);
+    fornecedor.setDataBaixa(LocalDateTime.now());
 
-        fornecedorRepository.salvar(fornecedor);
-    }
+    fornecedorRepository.salvar(fornecedor);
+  }
 
-    public RespostaPaginadaDTO<Fornecedor> pesquisarFornecedores(String termo, int pagina, int tamanhoPagina) {
-        return fornecedorRepository.pesquisarFornecedores(termo, pagina, tamanhoPagina);
-    }
+  public RespostaPaginadaDTO<Fornecedor> pesquisarFornecedores(String termo, int pagina, int tamanhoPagina) {
+    return fornecedorRepository.pesquisarFornecedores(termo, pagina, tamanhoPagina);
+  }
 
-    public Fornecedor encontrarPorId(UUID id) {
-        Fornecedor fornecedor = fornecedorRepository.encontrarPorId(id)
-            .orElseThrow(() -> new RegistroNaoEncontradoException("Fornecedor não encontrado para o id: " + id + "."));
+  public Fornecedor encontrarPorId(UUID id) {
+    Fornecedor fornecedor = fornecedorRepository.encontrarPorId(id)
+      .orElseThrow(() -> new RegistroNaoEncontradoException("Fornecedor não encontrado para o id: " + id + "."));
 
-        return fornecedor;
-    }
+    return fornecedor;
+  }
 }

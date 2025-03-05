@@ -20,62 +20,65 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public class ProdutoService {
 
-    @Inject
-    ProdutoRepository produtoRepository;
+  @Inject
+  ProdutoRepository produtoRepository;
 
-    @Inject
-    ItemNotaFiscalRepository itemNotaFiscalRepository;
+  @Inject
+  ItemNotaFiscalRepository itemNotaFiscalRepository;
 
-    public Produto criarProduto(CriarProdutoDTO dto) {
-        boolean produtoExiste = produtoRepository.encontrarPorTermo("codigo", dto.getCodigo()).isPresent();
-        if (produtoExiste)
-            throw new RegistroDuplicadoException("Já existe um produto cadastrado com este código: " + dto.getCodigo() + ".");
+  public Produto criarProduto(CriarProdutoDTO dto) {
+    boolean produtoExiste = produtoRepository.encontrarPorTermo("codigo", dto.getCodigo()).isPresent();
+    if (produtoExiste)
+      throw new RegistroDuplicadoException("Já existe um produto cadastrado com este código: " + dto.getCodigo() + ".");
 
-        Produto produto = new Produto(null,
-            dto.getCodigo(), 
-            dto.getDescricao(),
-            dto.getSituacao());
-        
-        produtoRepository.salvar(produto);
-        return produto;
-    }
+    Produto produto = new Produto(null,
+      dto.getCodigo(), 
+      dto.getDescricao(),
+      dto.getSituacao());
+    
+    produtoRepository.salvar(produto);
+    return produto;
+  }
 
-    public Produto editarProduto(UUID id, EditarProdutoDTO dto) {
-        Produto produto = produtoRepository.encontrarPorId(id)
-                .orElseThrow(() -> new RegistroNaoEncontradoException("Produto não encontrado para o id: " + id + "."));
+  public Produto editarProduto(UUID id, EditarProdutoDTO dto) {
+    Produto produto = produtoRepository.encontrarPorId(id)
+      .orElseThrow(() -> new RegistroNaoEncontradoException("Produto não encontrado para o id: " + id + "."));
 
-        produto.setDescricao(dto.getDescricao());
+    produto.setDescricao(dto.getDescricao());
 
-        if (dto.getCodigo() != null)
-            produto.setCodigo(dto.getCodigo());
+    if (dto.getCodigo() != null)
+      produto.setCodigo(dto.getCodigo());
 
-        produtoRepository.salvar(produto);
-        return produto;
-    }
+    if (dto.getSituacao() != null)
+      produto.setSituacao(dto.getSituacao());
 
-    public void excluirProduto(UUID id) {
-        Produto produto = produtoRepository.encontrarPorId(id)
-                .orElseThrow(() -> new RegistroNaoEncontradoException("Produto não encontrado para o id: " + id + "."));
+    produtoRepository.salvar(produto);
+    return produto;
+  }
 
-        boolean produtoVinculadoNotaFiscal = itemNotaFiscalRepository.validarProdutoVinculado(id);
+  public void excluirProduto(UUID id) {
+    Produto produto = produtoRepository.encontrarPorId(id)
+      .orElseThrow(() -> new RegistroNaoEncontradoException("Produto não encontrado para o id: " + id + "."));
 
-        if (produtoVinculadoNotaFiscal)
-            throw new RegistroNaoExcludenteException("Produto com id " + id + " está vinculado a uma nota fiscal e não pode ser excluído.");
+    boolean produtoVinculadoNotaFiscal = itemNotaFiscalRepository.validarProdutoVinculado(id);
 
-        produto.setSituacao(EnumSituacaoProduto.INATIVO);
-        produto.setDataExclusao(LocalDateTime.now());
+    if (produtoVinculadoNotaFiscal)
+      throw new RegistroNaoExcludenteException("Produto com id " + id + " está vinculado a uma nota fiscal e não pode ser excluído.");
 
-        produtoRepository.salvar(produto);
-    }
+    produto.setSituacao(EnumSituacaoProduto.INATIVO);
+    produto.setDataExclusao(LocalDateTime.now());
 
-    public RespostaPaginadaDTO<Produto> pesquisarProdutos(String termo, int pagina, int tamanhoPagina) {
-        return produtoRepository.pesquisarProdutos(termo, pagina, tamanhoPagina);
-    }
+    produtoRepository.salvar(produto);
+  }
 
-    public Produto encontrarPorId(UUID id) {
-        Produto produto = produtoRepository.encontrarPorId(id)
-            .orElseThrow(() -> new RegistroNaoEncontradoException("Produto não encontrado para o id: " + id + "."));
+  public RespostaPaginadaDTO<Produto> pesquisarProdutos(String termo, int pagina, int tamanhoPagina) {
+    return produtoRepository.pesquisarProdutos(termo, pagina, tamanhoPagina);
+  }
 
-        return produto;
-    }
+  public Produto encontrarPorId(UUID id) {
+    Produto produto = produtoRepository.encontrarPorId(id)
+      .orElseThrow(() -> new RegistroNaoEncontradoException("Produto não encontrado para o id: " + id + "."));
+
+    return produto;
+  }
 }

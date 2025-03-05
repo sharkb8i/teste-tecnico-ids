@@ -20,67 +20,67 @@ import com.exemplo.services.NotaFiscalService;
 @Produces(MediaType.APPLICATION_JSON)
 public class NotaFiscalController {
 
-    @Inject
-    private NotaFiscalService notaFiscalService;
+  @Inject
+  private NotaFiscalService notaFiscalService;
 
-    @POST
-    @Transactional
-    public Response entradaNotaFiscal(EntradaNotaFiscalDTO dto) {
-        NotaFiscal notaFiscal = notaFiscalService.entradaNotaFiscal(dto);
-        return Response.ok(notaFiscal).status(201).build();
-    }
+  @POST
+  @Transactional
+  public Response entradaNotaFiscal(EntradaNotaFiscalDTO dto) {
+    NotaFiscal notaFiscal = notaFiscalService.entradaNotaFiscal(dto);
+    return Response.ok(notaFiscal).status(201).build();
+  }
 
-    @GET
-    @Path("/{id}")
-    public Response pesquisarNotaFiscalPorId(@PathParam("id") UUID id) {
-        NotaFiscal notaFiscal = notaFiscalService.encontrarPorId(id);
-        return Response.ok(notaFiscal).status(200).build();
-    }
+  @GET
+  @Path("/{id}")
+  public Response pesquisarNotaFiscalPorId(@PathParam("id") UUID id) {
+    NotaFiscal notaFiscal = notaFiscalService.encontrarPorId(id);
+    return Response.ok(notaFiscal).status(200).build();
+  }
 
-    @GET
-    @Path("/emitir/{id}")
-    @Transactional
-    public Response emitirNotaFiscalPorId(@PathParam("id") UUID id) {
-        notaFiscalService.emitirNotaFiscalPorId(id);
-        return Response.noContent().build();
-    }
+  @GET
+  @Path("/emitir/{id}")
+  @Transactional
+  public Response emitirNotaFiscalPorId(@PathParam("id") UUID id) {
+    notaFiscalService.emitirNotaFiscalPorId(id);
+    return Response.noContent().build();
+  }
 
-    @PATCH
-    @Path("/{id}")
-    @Transactional
-    public Response editarNotaFiscal(@PathParam("id") UUID id, EditarNotaFiscalDTO dto) {
-        NotaFiscal notaFiscal = notaFiscalService.editarNotaFiscal(id, dto);
-        return Response.ok(notaFiscal).build();
-    }
+  @PATCH
+  @Path("/{id}")
+  @Transactional
+  public Response editarNotaFiscal(@PathParam("id") UUID id, EditarNotaFiscalDTO dto) {
+    NotaFiscal notaFiscal = notaFiscalService.editarNotaFiscal(id, dto);
+    return Response.ok(notaFiscal).build();
+  }
 
-    @PATCH
-    @Path("/{id}/adicionar")
-    @Transactional
-    public Response adicionarItemNotaFiscal(@PathParam("id") UUID id, ItemNotaFiscalDTO dto) {
-        notaFiscalService.adicionarItemNotaFiscal(id, dto);
-        return Response.noContent().build();
-    }
+  @PATCH
+  @Path("/{id}/adicionar")
+  @Transactional
+  public Response adicionarItemNotaFiscal(@PathParam("id") UUID id, ItemNotaFiscalDTO dto) {
+    notaFiscalService.adicionarItemNotaFiscal(id, dto);
+    return Response.noContent().build();
+  }
 
-    @PATCH
-    @Path("/{id}/remover/{idItem}")
-    @Transactional
-    public Response removerItemNotaFiscal(@PathParam("id") UUID id, @PathParam("idItem") UUID idItem) {
-        notaFiscalService.removerItemNotaFiscal(id, idItem);
-        return Response.noContent().build();
-    }
+  @PATCH
+  @Path("/{id}/remover/{idItem}")
+  @Transactional
+  public Response removerItemNotaFiscal(@PathParam("id") UUID id, @PathParam("idItem") UUID idItem) {
+    notaFiscalService.removerItemNotaFiscal(id, idItem);
+    return Response.noContent().build();
+  }
 
-    @DELETE
-    @Path("/{id}")
-    @Transactional
-    public Response excluirNotaFiscal(@PathParam("id") UUID id) {
-        notaFiscalService.excluirNotaFiscal(id);
-        return Response.noContent().build();
-    }
+  @DELETE
+  @Path("/{id}")
+  @Transactional
+  public Response excluirNotaFiscal(@PathParam("id") UUID id) {
+    notaFiscalService.excluirNotaFiscal(id);
+    return Response.noContent().build();
+  }
 
-    @GET
-    public RespostaPaginadaDTO<NotaFiscal> pesquisarNotasFiscais(@QueryParam("termo") String termo,
-                                                                 @QueryParam("pagina") @DefaultValue("1") int pagina,
-                                                                 @QueryParam("tamanhoPagina") @DefaultValue("10") int tamanhoPagina) {
-        return notaFiscalService.pesquisarNotasFiscais(termo, pagina, tamanhoPagina);
-    }
+  @GET
+  public RespostaPaginadaDTO<NotaFiscal> pesquisarNotasFiscais(@QueryParam("termo") String termo,
+                                                               @QueryParam("pagina") @DefaultValue("1") int pagina,
+                                                               @QueryParam("tamanhoPagina") @DefaultValue("10") int tamanhoPagina) {
+    return notaFiscalService.pesquisarNotasFiscais(termo, pagina, tamanhoPagina);
+  }
 }

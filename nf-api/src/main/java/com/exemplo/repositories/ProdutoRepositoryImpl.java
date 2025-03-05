@@ -16,80 +16,80 @@ import com.exemplo.interfaces.ProdutoRepository;
 @ApplicationScoped
 public class ProdutoRepositoryImpl extends BaseRepositoryImpl<Produto> implements ProdutoRepository {
     
-    public ProdutoRepositoryImpl() {
-        super(null, Produto.class);
+  public ProdutoRepositoryImpl() {
+    super(null, Produto.class);
+  }
+
+  @Inject
+  public ProdutoRepositoryImpl(EntityManager entityManager) {
+    super(entityManager, Produto.class);
+  }
+
+  @Override
+  public RespostaPaginadaDTO<Produto> pesquisarProdutos(String termo, int pagina, int tamanhoPagina) {
+    TypedQuery<Produto> query;
+
+    String selectString = "SELECT p FROM Produto p ";
+    String countString = "SELECT COUNT(p) FROM Produto p ";
+    String whereString = "WHERE p.codigo LIKE :codigo OR p.descricao LIKE :descricao";
+
+    boolean termoUUID = termo != null ? uuidValido(termo) : false;
+    boolean termoEnum = termo != null ? enumSituacaoValido(termo) : false;
+
+    if (termoUUID) {
+      whereString = "WHERE f.id = :id";
+      query = entityManager.createQuery(selectString.concat(whereString), Produto.class);
+      query.setParameter("id", UUID.fromString(termo)); 
+    } else {
+      StringBuilder queryString = new StringBuilder(termo != null
+        ? selectString.concat(whereString)
+        : selectString);
+          
+      if (termoEnum)
+        queryString.append(" OR p.situacao = :situacao");
+
+      query = entityManager.createQuery(queryString.toString(), Produto.class);
+      if (termo != null) {
+        query.setParameter("codigo", "%" + termo + "%");
+        query.setParameter("descricao", "%" + termo + "%");
+      }
+
+      if (termoEnum)
+        query.setParameter("situacao", EnumSituacaoProduto.valueOf(termo.toUpperCase()));
     }
 
-    @Inject
-    public ProdutoRepositoryImpl(EntityManager entityManager) {
-        super(entityManager, Produto.class);
+    StringBuilder countQueryString = new StringBuilder(termo != null
+      ? countString.concat(whereString)
+      : countString);
+
+    if (termoEnum)
+      countQueryString.append(" OR p.situacao = :situacao");
+
+    TypedQuery<Long> countQuery = entityManager.createQuery(countQueryString.toString(), Long.class);
+    if (termo != null) {
+      countQuery.setParameter("codigo", "%" + termo + "%");
+      countQuery.setParameter("descricao", "%" + termo + "%");
     }
 
-    @Override
-    public RespostaPaginadaDTO<Produto> pesquisarProdutos(String termo, int pagina, int tamanhoPagina) {
-        TypedQuery<Produto> query;
+    if (termoEnum)
+      countQuery.setParameter("situacao", EnumSituacaoProduto.valueOf(termo.toUpperCase()));
 
-        String selectString = "SELECT p FROM Produto p ";
-        String countString = "SELECT COUNT(p) FROM Produto p ";
-        String whereString = "WHERE p.codigo LIKE :codigo OR p.descricao LIKE :descricao";
+    long totalResultados = countQuery.getSingleResult();
 
-        boolean termoUUID = termo != null ? uuidValido(termo) : false;
-        boolean termoEnum = termo != null ? enumSituacaoValido(termo) : false;
+    List<Produto> produtos = query.getResultList();
+    
+    query.setFirstResult((pagina - 1) * tamanhoPagina);
+    query.setMaxResults(tamanhoPagina);
+    
+    return new RespostaPaginadaDTO<Produto>(produtos, pagina, totalResultados, tamanhoPagina);
+  }
 
-        if (termoUUID) {
-            whereString = "WHERE f.id = :id";
-            query = entityManager.createQuery(selectString.concat(whereString), Produto.class);
-            query.setParameter("id", UUID.fromString(termo)); 
-        } else {
-            StringBuilder queryString = new StringBuilder(termo != null
-                ? selectString.concat(whereString)
-                : selectString);
-            
-            if (termoEnum)
-                queryString.append(" OR p.situacao = :situacao");
-
-            query = entityManager.createQuery(queryString.toString(), Produto.class);
-            if (termo != null) {
-                query.setParameter("codigo", "%" + termo + "%");
-                query.setParameter("descricao", "%" + termo + "%");
-            }
-
-            if (termoEnum)
-                query.setParameter("situacao", EnumSituacaoProduto.valueOf(termo.toUpperCase()));
-        }
-
-        StringBuilder countQueryString = new StringBuilder(termo != null
-            ? countString.concat(whereString)
-            : countString);
-
-        if (termoEnum)
-            countQueryString.append(" OR p.situacao = :situacao");
-
-        TypedQuery<Long> countQuery = entityManager.createQuery(countQueryString.toString(), Long.class);
-        if (termo != null) {
-            countQuery.setParameter("codigo", "%" + termo + "%");
-            countQuery.setParameter("descricao", "%" + termo + "%");
-        }
-
-        if (termoEnum)
-            countQuery.setParameter("situacao", EnumSituacaoProduto.valueOf(termo.toUpperCase()));
-
-        long totalResultados = countQuery.getSingleResult();
-
-        List<Produto> produtos = query.getResultList();
-        
-        query.setFirstResult((pagina - 1) * tamanhoPagina);
-        query.setMaxResults(tamanhoPagina);
-        
-        return new RespostaPaginadaDTO<Produto>(produtos, pagina, totalResultados, tamanhoPagina);
+  private boolean enumSituacaoValido(String termo) {
+    try {
+      EnumSituacaoProduto.valueOf(termo.toUpperCase());
+      return true;
+    } catch (IllegalArgumentException e) {
+      return false;
     }
-
-    private boolean enumSituacaoValido(String termo) {
-        try {
-            EnumSituacaoProduto.valueOf(termo.toUpperCase());
-            return true;
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
-    }
+  }
 }

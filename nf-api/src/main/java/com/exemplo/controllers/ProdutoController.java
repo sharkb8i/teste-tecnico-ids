@@ -19,43 +19,43 @@ import java.util.UUID;
 @Consumes(MediaType.APPLICATION_JSON)
 public class ProdutoController {
 
-    @Inject
-    private ProdutoService produtoService;
+  @Inject
+  private ProdutoService produtoService;
 
-    @POST
-    @Transactional
-    public Response criarProduto(CriarProdutoDTO dto) {
-        Produto produto = produtoService.criarProduto(dto);
-        return Response.ok(produto).status(201).build();
-    }
+  @POST
+  @Transactional
+  public Response criarProduto(CriarProdutoDTO dto) {
+    Produto produto = produtoService.criarProduto(dto);
+    return Response.ok(produto).status(201).build();
+  }
 
-    @GET
-    @Path("/{id}")
-    public Response pesquisarProdutoPorId(@PathParam("id") UUID id) {
-        Produto produto = produtoService.encontrarPorId(id);
-        return Response.ok(produto).status(200).build();
-    }
+  @GET
+  @Path("/{id}")
+  public Response pesquisarProdutoPorId(@PathParam("id") UUID id) {
+    Produto produto = produtoService.encontrarPorId(id);
+    return Response.ok(produto).status(200).build();
+  }
 
-    @PATCH
-    @Path("/{id}")
-    @Transactional
-    public Response editarProduto(@PathParam("id") UUID id, EditarProdutoDTO dto) {
-        Produto produto = produtoService.editarProduto(id, dto);
-        return Response.ok(produto).build();
-    }
+  @PATCH
+  @Path("/{id}")
+  @Transactional
+  public Response editarProduto(@PathParam("id") UUID id, EditarProdutoDTO dto) {
+    Produto produto = produtoService.editarProduto(id, dto);
+    return Response.ok(produto).build();
+  }
 
-    @DELETE
-    @Path("/{id}")
-    @Transactional
-    public Response excluirProduto(@PathParam("id") UUID id) {
-        produtoService.excluirProduto(id);
-        return Response.noContent().build();
-    }
+  @DELETE
+  @Path("/{id}")
+  @Transactional
+  public Response excluirProduto(@PathParam("id") UUID id) {
+    produtoService.excluirProduto(id);
+    return Response.noContent().build();
+  }
 
-    @GET
-    public RespostaPaginadaDTO<Produto> pesquisarProdutos(@QueryParam("termo") String termo,
-                                                          @QueryParam("pagina") @DefaultValue("1") int pagina,
-                                                          @QueryParam("tamanhoPagina") @DefaultValue("10") int tamanhoPagina) {
-        return produtoService.pesquisarProdutos(termo, pagina, tamanhoPagina);
-    }
+  @GET
+  public RespostaPaginadaDTO<Produto> pesquisarProdutos(@QueryParam("termo") String termo,
+                                                        @QueryParam("pagina") @DefaultValue("1") int pagina,
+                                                        @QueryParam("tamanhoPagina") @DefaultValue("10") int tamanhoPagina) {
+    return produtoService.pesquisarProdutos(termo, pagina, tamanhoPagina);
+  }
 }

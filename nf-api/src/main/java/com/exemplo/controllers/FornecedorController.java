@@ -19,47 +19,47 @@ import com.exemplo.valueobjects.CNPJ;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class FornecedorController {
-    
-    @Inject
-    private FornecedorService fornecedorService;
+  
+  @Inject
+  private FornecedorService fornecedorService;
 
-    @POST
-    @Transactional
-    public Response criarFornecedor(CriarFornecedorDTO dto) {
-        if (dto == null || dto.getCnpj() == null || !CNPJ.validarCnpj(dto.getCnpj().getNumero()))
-            throw new IllegalArgumentException("CNPJ inválido: " + dto.getCnpj().getNumero() + ".");
+  @POST
+  @Transactional
+  public Response criarFornecedor(CriarFornecedorDTO dto) {
+    if (dto == null || dto.getCnpj() == null || !CNPJ.validarCnpj(dto.getCnpj().getNumero()))
+      throw new IllegalArgumentException("CNPJ inválido: " + dto.getCnpj().getNumero() + ".");
 
-        Fornecedor fornecedor = fornecedorService.criarFornecedor(dto);
-        return Response.ok(fornecedor).status(201).build();
-    }
+    Fornecedor fornecedor = fornecedorService.criarFornecedor(dto);
+    return Response.ok(fornecedor).status(201).build();
+  }
 
-    @GET
-    @Path("/{id}")
-    public Response pesquisarFornecedorPorId(@PathParam("id") UUID id) {
-        Fornecedor fornecedor = fornecedorService.encontrarPorId(id);
-        return Response.ok(fornecedor).status(200).build();
-    }
+  @GET
+  @Path("/{id}")
+  public Response pesquisarFornecedorPorId(@PathParam("id") UUID id) {
+    Fornecedor fornecedor = fornecedorService.encontrarPorId(id);
+    return Response.ok(fornecedor).status(200).build();
+  }
 
-    @PATCH
-    @Path("/{id}")
-    @Transactional
-    public Response editarFornecedor(@PathParam("id") UUID id, EditarFornecedorDTO dto) {
-        Fornecedor fornecedor = fornecedorService.editarFornecedor(id, dto);
-        return Response.ok(fornecedor).build();
-    }
+  @PATCH
+  @Path("/{id}")
+  @Transactional
+  public Response editarFornecedor(@PathParam("id") UUID id, EditarFornecedorDTO dto) {
+    Fornecedor fornecedor = fornecedorService.editarFornecedor(id, dto);
+    return Response.ok(fornecedor).build();
+  }
 
-    @DELETE
-    @Path("/{id}")
-    @Transactional
-    public Response excluirFornecedor(@PathParam("id") UUID id) {
-        fornecedorService.excluirFornecedor(id);
-        return Response.noContent().build();
-    }
+  @DELETE
+  @Path("/{id}")
+  @Transactional
+  public Response excluirFornecedor(@PathParam("id") UUID id) {
+    fornecedorService.excluirFornecedor(id);
+    return Response.noContent().build();
+  }
 
-    @GET
-    public RespostaPaginadaDTO<Fornecedor> pesquisarFornecedores(@QueryParam("termo") String termo,
-                                                                 @QueryParam("pagina") @DefaultValue("1") int pagina,
-                                                                 @QueryParam("tamanhoPagina") @DefaultValue("10") int tamanhoPagina) {
-        return fornecedorService.pesquisarFornecedores(termo, pagina, tamanhoPagina);
-    }
+  @GET
+  public RespostaPaginadaDTO<Fornecedor> pesquisarFornecedores(@QueryParam("termo") String termo,
+                                                               @QueryParam("pagina") @DefaultValue("1") int pagina,
+                                                               @QueryParam("tamanhoPagina") @DefaultValue("10") int tamanhoPagina) {
+    return fornecedorService.pesquisarFornecedores(termo, pagina, tamanhoPagina);
+  }
 }

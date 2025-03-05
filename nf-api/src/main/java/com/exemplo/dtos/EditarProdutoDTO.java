@@ -1,27 +1,30 @@
 package com.exemplo.dtos;
 
+import com.exemplo.entities.EnumBase;
+import com.exemplo.entities.EnumSituacaoProduto;
+
 public class EditarProdutoDTO {
-    private String codigo;
-    private String descricao;
+  private String codigo;
+  private String descricao;
+  private EnumSituacaoProduto situacao;
 
-    public EditarProdutoDTO(String codigo, String descricao) {
-        this.codigo = codigo;
-        this.descricao = descricao;
-    }
+  public EditarProdutoDTO(String codigo, String descricao, String situacao) {
+      this.codigo = codigo;
+      this.descricao = descricao;
+      this.situacao = situacao == null ? 
+    EnumSituacaoProduto.ATIVO : 
+    EnumBase.fromString(EnumSituacaoProduto.class, situacao);
+  }
 
-    public String getCodigo() {
-        return codigo;
-    }
+  public String getCodigo() {
+    return codigo;
+  }
 
-    public void setCodigo(String codigo) {
-        this.codigo = codigo;
-    }
+  public String getDescricao() {
+    return descricao;
+  }
 
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
-    }
+  public EnumSituacaoProduto getSituacao() {
+    return situacao;
+  }
 }
